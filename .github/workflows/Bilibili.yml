@@ -7,6 +7,7 @@ name: Bilibili
 
 on:
    gollum:
+   workflow_dispatch:
    schedule:
        - cron: '30 2 * * *'
 
