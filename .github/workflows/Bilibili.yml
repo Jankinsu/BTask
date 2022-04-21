@@ -6,12 +6,9 @@
 name: Bilibili
 
 on:
-   push:
-     branches: main
    gollum:
-   workflow_dispatch:
    schedule:
-       - cron: '19 18 * * *'
+       - cron: '30 2 * * *'
 
 jobs:
   start:
@@ -24,22 +21,18 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Cache Gradle packages
+    - name: Cache local Maven repository
       uses: actions/cache@v2
       with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-        restore-keys: ${{ runner.os }}-gradle
-    - name: Build with Gradle
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Build with Maven
       env:
         BILI_JCT: ${{ secrets.BILI_JCT }}
         DEDEUSERID: ${{ secrets.DEDEUSERID }}
         SESSDATA: ${{ secrets.SESSDATA }}
         SCKEY: ${{ secrets.SCKEY }}
-        DINGTALK: ${{secrets.DINGTALK}}
-        PUSHPLUSTK: ${{secrets.PUSHPLUSTK}}
-        SENDKEY: ${{ secrets.SENDKEY }}
-        TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
-        TELEGRAM_CHAT_ID: ${{secrets.TELEGRAM_CHAT_ID}}
       run:
-        sh gradlew runMain
+        mvn compile exec:java -Dexec.mainClass="top.srcrs.bilibili.BiliStart" -Dexec.args="${BILI_JCT} ${SESSDATA} ${DEDEUSERID} ${SCKEY}"
